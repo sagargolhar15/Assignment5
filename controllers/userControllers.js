@@ -99,11 +99,11 @@ const saveRegister = (req, res) => {
     try {
         uploadSingle(req, res, (err) => {
             if (err) {
-                res.render("register", { error: err.message })
+                res.render("register", { error: err.message,csrf: req.csrfToken()})
             }
             else {
                 let { email, uname, password } = req.body;
-                let name1 = /^[a-z A-Z 0-9][a-z A-Z 0-9_]*[a-z A-Z 0-9](?<![_\s\-]{6,}.*)$/;
+                let name1 = /[a-zA-Z]{5}\s?[0-9]{3}\s?$/;
                 let email1 = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
                 let pass1 = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,24}$/;
                 let nameErr;
@@ -136,7 +136,7 @@ const saveRegister = (req, res) => {
                 }
                 else {
                     if (!name1.test(uname)) {
-                        nameErr = 'Only latter and white spaces allow ';
+                        nameErr = 'first 5 digits are alphabets and next 3 digits are numeric   ';
                     }
                     if (!email1.test(email)) {
                         emailErr = 'Email address is not valid';

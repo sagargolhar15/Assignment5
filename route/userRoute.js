@@ -44,7 +44,7 @@ router.post("/postresetpassword",postresetpassword)
 router.get("/activateaccount/:id",activateAccount)
 
 router.get("/logout", (req, res) => {
- req.session.destroy(); return res.redirect("/login");
+ req.session.destroy(); return res.redirect("/");
 })
 
 router.get("/download", downloadFile)
