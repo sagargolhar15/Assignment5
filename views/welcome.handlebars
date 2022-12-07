@@ -1,0 +1,19 @@
+{{>nav}}
+    {{#if successMsg}}
+  <script>
+    alert('Login Successfull')
+  </script>
+  {{/if}}
+    <div class="container text-dark">
+      <div class="row">
+        <div class="col-md-12">
+            <h4>Hi {{username}}, you are welcome here</h4>
+          <img src="./uploads/{{path}}" class="mt-3" width="200" height="200"/><br/>
+          <a  class=" btn btn-outline-success mt-4" href="/download"> Download Image</a>
+
+        </div>
+      </div>
+          
+    </div>
+  
+{{>footer}}

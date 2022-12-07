@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Registration Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <link href="./css/login.css" rel="stylesheet" id="bootstrap-css">
+
+</head>
+
+<body>
+    <div class="container h-100">
+        {{#if error}}
+            <div class="alert alert-danger w-25 mx-auto d-block mt-2"> {{error}}</div>
+        {{/if}}
+         {{#if successMsg}}
+            <div class="alert alert-success w-25 mx-auto d-block mt-2"> {{successMsg}}
+                 <br><span class="text-warning"><strong>Activation Mail Send to your email
+        aadress</strong></span>
+        </div>
+          
+        {{/if}}
+        <div class="d-flex justify-content-center mt-4 h-100">
+            <div class="user_card1">
+                <div class="d-flex justify-content-center">
+                    <div class="brand_logo_container">
+                        <img src="https://res.cloudinary.com/crunchbase-production/image/upload/c_lpad,f_auto,q_auto:eco,dpr_1/rdoftbzurlp50yearkrj"
+                            class="brand_logo" alt="Logo">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center form_container">
+                    
+                         <form action="/postRegister?_csrf={{csrf}}" enctype="multipart/form-data" method="post">
+                            <h2 class="text-center">Register Here..</h2>
+                            <div class="mb-3">
+                                <label>UserName</label>
+                                <input type="text" name="uname" class="form-control input_user" value=""
+                                    placeholder="username">
+                                    {{#if nameErr}}
+                                    <p class="text-danger font-weight-bold">{{nameErr}}</p>
+                                    {{/if}}
+                            </div>
+                            <div class="mb-3">
+                                <label>Email</label>
+                                <input type="email" name="email" class="form-control input_user" value=""
+                                    placeholder="email" >
+                                    {{#if emailErr}}
+                                    <p class="text-danger font-weight-bold">{{emailErr}}</p>
+                                    {{/if}}
+                            </div>
+                            <div class="mb-2">
+                                <label>Password</label>
+                                <input type="password" name="password" class="form-control input_pass" placeholder="password">
+                                {{#if passErr}}
+                                    <p class="text-danger font-weight-bold">{{passErr}}</p>
+                                    {{/if}}
+                            </div>
+                            <div class="mb-2">
+                                <label>Select Image</label>
+                                <input type="file" name="image" class="form-control input_pass" required>
+                            </div>
+
+                            <div class="d-flex justify-content-center mt-3 login_container">
+                               <input type="submit" value="Submit" class="btn login_btn"/>
+                           </div>
+                            </form>
+                </div>
+
+                <div class="mt-1 mb-4">
+                    <div class="d-flex justify-content-center links">
+                        Already have an account? <a href="/" class="ml-2 text-decoration-none">Sign in</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> Login Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+        integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <link href="./css/login.css" rel="stylesheet" id="bootstrap-css">
+</head>
+
+<body>
+    {{#if succMsg}}
+    <div class="toast" role="alert" aria-live="polite" aria-atomic="true" data-delay="10000">
+        <div style="position: absolute; top: 0; right: 0;">
+
+            <div role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-body alert alert-success mt-2 mr-2">
+                    {{succMsg}}
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    {{/if}}
+    <div class="container h-100">
+        {{#if errMsg}}
+        <div class="alert alert-danger w-25 mx-auto d-block mt-3"> {{errMsg}}</div>
+        {{/if}}
+
+        <div class="d-flex justify-content-center h-100 mt-3">
+            <div class="user_card">
+                <div class="d-flex justify-content-center">
+                    <div class="brand_logo_container">
+                        <img src="https://res.cloudinary.com/crunchbase-production/image/upload/c_lpad,f_auto,q_auto:eco,dpr_1/rdoftbzurlp50yearkrj"
+                            class="brand_logo" alt="Logo">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center mt-1">
+                    <form action="/postresetpassword" method="post">
+                        <h2 class="text-center mt-4">Add New Password</h2>
+                        <label for="" class="font-weight-bold"> Password</label>
+
+                        <div class="input-group mb-2 mt-2">
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            </div>
+                            <input type="password" name="password" class="form-control input_pass" value=""
+                                placeholder="password">
+                                {{#if passErr}}
+                                    <p class="text-danger font-weight-bold">{{passErr}}</p>
+                                    {{/if}}
+                        </div>
+                        <input type="hidden" name="id" value="{{uid}}" />
+                        <input type="hidden" name="token" value="{{token}}" />
+                        <input type="hidden" name="_csrf" value="{{csrf}}" />
+                        <div class="d-flex justify-content-center mt-3 login_container">
+                            <input type="submit" value="Change Password" class="btn login_btn" />
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
