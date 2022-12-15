@@ -1,0 +1,107 @@
+{{>nav}}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped  ">
+                <h1>Shopping Cart</h1>
+                <thead class="bg-white text-center">
+                    <th>Pizza</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th></th>
+
+
+                </thead>
+                <tbody class="text-center">
+
+                    {{#each data}}
+                    <tr class="bg-white" id="trrow{{_id}}">
+                        <td class="">
+                            <img src='{{image}}' height="60px" width="150px">
+                        </td>
+
+                        <td >
+                            {{name}}
+                        </td>
+                        <td id="price_rate{{_id}}">
+                            {{price}}
+                        </td>
+                        <td style="width: 50px;">
+                            <table class="table-bordered">
+                                <tr class="d-block mx-auto">
+                                    <td onclick="changeQty('{{product_id}}','{{_id}}','minus')">
+                                        <i class="fa fa-minus"></i>
+                                    </td>
+                                    <td id="current_qty{{_id}}">
+                                        {{qty}}
+                                    </td>
+                                    <td onclick="changeQty('{{product_id}}','{{_id}}','plus')">
+                                        <i class="fa fa-plus"></i>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td id="product_ttl{{_id}}" class="prod_ttl">
+                            {{total}}
+                        </td>
+                        <td>
+                            <a href='/deletecart/{{_id}}'onclick="return confirm('Are you sure...')" class="btn btn-dark float-end ">Delete</a>
+
+                        </td>
+                        
+                    </tr>
+                    {{/each}}
+
+
+                    <tr style="background-color:lightgreen; font-size:25px;font-weight:bold;">
+                        <td colspan="4">Total</td>
+                        <td>&#8377;<span id="final_price">{{sum}}
+                            </span> /-</td>
+                        <td>
+                            <a href="/checkout" class="btn btn-success float-end"> Checkout</a>
+                        </td>
+                    </tr>
+
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI="
+    crossorigin="anonymous"></script>
+<script>
+    function changeQty(product_id, c_id, operation) {
+        var obj = {
+            url: "/changeQtyByAjax",
+            type: 'post',
+            data: { 'p_id': product_id, 'cart_id': c_id, 'operation': operation }
+        };
+        $.ajax(obj).done(
+            function (result) {
+                $("#current_qty" + c_id).html(result.qty)
+                printProductTotal(c_id)
+                if (result.status == 'deleted') {
+                    $("#trrow" + c_id).remove();
+                }
+            }
+        )
+    }
+    function printProductTotal(cart_id) {
+        a = ($("#price_rate" + cart_id).html())
+        b = ($("#current_qty" + cart_id).html())
+        $("#product_ttl" + cart_id).html(a * b)
+        var p_ttls = $(".prod_ttl")
+        var sum = 0;
+        for (let i = 0; i < p_ttls.length; i++) {
+            sum += Number(p_ttls[i].innerHTML)
+            console.log(p_ttls[i].innerHTML)
+        }
+        $("#final_price").html(sum)
+    }
+</script>
+
+{{>footer}}

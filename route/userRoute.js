@@ -1,5 +1,5 @@
 const express=require('express')
-const {homePage,registerPage,saveRegister,loginPage,postLogin,welcomePage,postReset,resetAccount,postresetpassword,activateAccount,downloadFile}=require('../controllers/userControllers')
+const {homePage,registerPage,saveRegister,loginPage,postLogin,welcomePage,addtocart,cart,checkout,changeQtyByAjax,deletecart,postcheckout}=require('../controllers/userControllers')
 const router=express.Router()
 
 const csurf=require('csurf');
@@ -11,12 +11,7 @@ const sessions = require('express-session');
 
 const saltRounds = 10;
 
-const csrfMiddleware=csurf({
-    cookie:true
-})
 
-router.use(cookieParser());
-router.use(csrfMiddleware);
 router.use(sessions({
     secret: seceret,
     saveUninitialized: true,
@@ -30,22 +25,29 @@ router.get("/login",loginPage)
 router.post("/loginPost",postLogin)
 router.get("/welcome", welcomePage)
 
+
 router.get("/register",registerPage)
 router.post("/postRegister",saveRegister)
 
 router.get("/resetpassword",(req,res)=>{
-    res.render("resetpassword",{csrf:req.csrfToken()});
+    res.render("resetpassword");
 })
 
-router.post("/postreset",postReset)
-router.get("/resetaccount",resetAccount)
-router.post("/postresetpassword",postresetpassword)
+router.get("/addtocart/:id",addtocart)
+router.get("/cart",cart)
+router.post("/changeQtyByAjax",changeQtyByAjax)
 
-router.get("/activateaccount/:id",activateAccount)
+router.get('/deletecart/:id',deletecart)
+router.get('/menu',(req,res)=>{
+    res.redirect('/welcome')
+})
 
+router.get("/checkout",checkout)
+
+router.post('/postcheckout',postcheckout)
 router.get("/logout", (req, res) => {
  req.session.destroy(); return res.redirect("/");
 })
 
-router.get("/download", downloadFile)
+
 module.exports=router;

@@ -1,0 +1,13 @@
+{{>nav}}
+<div class="container mt-4">
+    <div class="row">
+        <h1 class="text-dark">This is Checkout Page</h1>
+        <form action="/postcheckout" method="post">
+        <label>Credit Card</label>
+        <input type="number" class="form-control" name="card_no" required/>
+        <h6 class="mt-3">Order Total : &#8377;{{sum}}</h6>
+        <input type="submit" class="btn btn-dark" value="submit">
+        </form>
+    </div>
+</div>
+{{>footer}}

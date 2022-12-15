@@ -6,44 +6,20 @@ const crypto = require('crypto');
 const hbs = require('nodemailer-express-handlebars');
 const saltRounds = 10;
 
-const dotenv=require('dotenv')
+const dotenv = require('dotenv')
 dotenv.config();
 
 const userModel = require('../model/User');
-const tokenModel = require('../model/token');
-const router = require('../route/userRoute');
+const productModel = require('../model/Product');
+const cartModel = require('../model/Cart');
 
-// file  Upload  code
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join('./public', "/uploads"))
-    },
-    filename: function (req, file, cb) {
-        fileExtension = path.extname(file.originalname);
-        cb(null, file.fieldname + "-" + Date.now() + fileExtension)
-
-    }
-})
-
-const upload = multer({
-    storage: storage,
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype == "image/png" || file.mimetype == "image/jpeg") {
-            cb(null, true)
-        }
-        else {
-            cb(null, false);
-            cb(new Error("Only png and jpg formet allowed"))
-        }
-    }
-});
 
 let transporter = nodemailer.createTransport({
     service: "gmail",
     port: 587,
     secure: false,
     auth: {
-        user:process.env.USER_NAME,
+        user: process.env.USER_NAME,
         pass: process.env.MAIL_PASS
     }
 });
@@ -54,18 +30,14 @@ transporter.use('compile', hbs(
 
     }
 ));
-var session;
-
-const uploadSingle = upload.single("image");
-
 const homePage = (req, res) => {
     try {
         session = req.session;
         if (session.username) {
-            return res.render("home", { uname: session.username })
+            res.render("welcome", { name: session.username })
         }
         else {
-            return res.render("login", { csrf: req.csrfToken() });
+            return res.render("home");
         }
     }
     catch (err) {
@@ -76,10 +48,10 @@ const loginPage = (req, res) => {
     try {
         let auth = req.query.msg ? true : false;
         if (auth) {
-            return res.render("login", { error: 'Invalid username or password', csrf: req.csrfToken() });
+            return res.render("login", { error: 'Invalid username or password' });
         }
         else {
-            return res.render("login", { csrf: req.csrfToken() });
+            return res.render("login");
         }
     }
     catch (err) {
@@ -88,7 +60,7 @@ const loginPage = (req, res) => {
 }
 const registerPage = (req, res) => {
     try {
-        res.render("register", { csrf: req.csrfToken() });
+        res.render("register");
     }
     catch (err) {
         console.log(err);
@@ -96,61 +68,60 @@ const registerPage = (req, res) => {
 }
 
 const saveRegister = (req, res) => {
-    try {
-        uploadSingle(req, res, (err) => {
-            if (err) {
-                res.render("register", { error: err.message,csrf: req.csrfToken()})
-            }
-            else {
-                let { email, uname, password } = req.body;
-                let name1 = /[a-zA-Z]{5}\s?[0-9]{3}\s?$/;
-                let email1 = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-                let pass1 = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,24}$/;
-                let nameErr;
-                let emailErr;
-                let passErr;
-                if (name1.test(uname) && email1.test(email) && pass1.test(password)) {
-                    const hash = bcrypt.hashSync(password, saltRounds);
-                    userModel.create({ email: email, username: uname, password: hash, image: req.file.filename, status: 0 })
-                        .then(data => {
-                            let mailOptions = {
-                                from: 'sagargolhar46@gmail.com',
-                                to: email,
-                                subject: "Activation Account",
-                                template: 'mail',
-                                context: {
-                                    username: uname,
-                                    id: data._id
-                                }
-                            }
-                            transporter.sendMail(mailOptions, (err, info) => {
-                                if (err) { console.log(err) }
-                                else {
-                                    res.render('register', { successMsg: 'Register Successfully' })
-                                }
-                            })
-                        })
-                        .catch(err => {
-                            res.render("register", { error: "User Already Registered", csrf: req.csrfToken() })
-                        })
+
+    let { email, uname, password, mobile, address } = req.body;
+    let name1 = /[a-zA-Z]{5}\s?[0-9]{3}\s?$/;
+    let email1 = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    let pass1 = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,24}$/;
+    let address1 = /^[\w-_.]*$/;
+    let mobile1 = /^[789]\d{9}$/;
+    let mobileErr;
+    let addressErr;
+    let nameErr;
+    let emailErr;
+    let passErr;
+    if (name1.test(uname) && email1.test(email) && pass1.test(password) && mobile1.test(mobile) && address1.test(address)) {
+        const hash = bcrypt.hashSync(password, saltRounds);
+        userModel.create({ email: email, username: uname, password: hash, mobile: mobile, address: address, status: 0 })
+            .then(data => {
+                let mailOptions = {
+                    from: 'sagargolhar46@gmail.com',
+                    to: email,
+                    subject: "Activation Account",
+                    template: 'mail',
+                    context: {
+                        username: uname,
+                        id: data._id
+                    }
                 }
-                else {
-                    if (!name1.test(uname)) {
-                        nameErr = 'first 5 digits are alphabets and next 3 digits are numeric   ';
+                transporter.sendMail(mailOptions, (err, info) => {
+                    if (err) { console.log(err) }
+                    else {
+                        res.render('register', { successMsg: 'Register Successfully' })
                     }
-                    if (!email1.test(email)) {
-                        emailErr = 'Email address is not valid';
-                    }
-                    if (!pass1.test(password)) {
-                        passErr = 'password between 8 to 24 characters which contain at least one  uppercase,lowercase'
-                    }
-                    res.render('register', { nameErr: nameErr, passErr: passErr, emailErr: emailErr, csrf: req.csrfToken() })
-                }
-            }
-        })
+                })
+            })
+            .catch(err => {
+                res.render("register", { error: "User Already Registered", })
+            })
     }
-    catch (err) {
-        console.log(err);
+    else {
+        if (!name1.test(uname)) {
+            nameErr = 'first 5 digits are alphabets and next 3 digits are numeric   ';
+        }
+        if (!email1.test(email)) {
+            emailErr = 'Email address is not valid';
+        }
+        if (!pass1.test(password)) {
+            passErr = 'password between 8 to 24 characters which contain at least one  uppercase,lowercase'
+        }
+        if (!mobile1.test(mobile)) {
+            mobileErr = 'Mobile No. is not valid'
+        }
+        if (!address1.test(address)) {
+            addressErr = 'address is not valid'
+        }
+        res.render('register', { nameErr: nameErr, passErr: passErr, emailErr: emailErr, mobileErr: mobileErr, addressErr: addressErr })
     }
 }
 
@@ -165,6 +136,7 @@ const postLogin = (req, res) => {
                 return res.redirect("/login?msg=fail");
             }
             else {
+                // console.log(data.pass)
                 if (bcrypt.compareSync(password, data.password)) {
                     session = req.session;
                     session.username = uname;
@@ -182,14 +154,23 @@ const postLogin = (req, res) => {
     }
 }
 
-const welcomePage = (req, res) => {
+const welcomePage = async (req, res) => {
     try {
         let username = req.session.username;
         if (username) {
             userModel.findOne({ username: username }, (err, data) => {
                 if (err) { }
                 else {
-                    return res.render("welcome", { username: username, path: data.image, successMsg: 'Login successfull' })
+                    cartModel.find({ user_id: data._id }, (err, cartData) => {
+                        if (err) {
+                            productModel.find({}, (err, data) => {
+                                res.render("welcome", { name: username, data: data.map(data => data.toJSON()), cart_tot: 0 })
+                            })
+                        }
+                        productModel.find({}, (err, data) => {
+                            res.render("welcome", { name: username, data: data.map(data => data.toJSON()), cart_tot: cartData.length })
+                        })
+                    })
                 }
             })
         }
@@ -201,85 +182,92 @@ const welcomePage = (req, res) => {
         console.log(err);
     }
 }
-
-const postReset = async (req, res) => {
+const addtocart = async (req, res) => {
     try {
-        let email = req.body.email;
-        let user = await userModel.findOne({ email: email });
-        if (user) {
-            let token = await tokenModel.findOne({ userId: user._id });
-            if (token) await tokenModel.deleteOne();
-            let restToken = crypto.randomBytes(32).toString("hex");
-            const hash = await bcrypt.hash(restToken, Number(saltRounds));
-            await new tokenModel({
-                userId: user._id,
-                token: hash,
-                createdAt: Date.now()
-            }).save();
-            let mailOptions = {
-                from: 'sagargolhar46@gmail.com',
-                to: email,
-                subject: "Rest Link",
-                template: 'resettemp',
-                context: {
-                    token: restToken,
-                    id: user._id,
-                    username: user.uname
-                }
+        if (req.session.username) {
+
+            let id = req.params.id;
+            let userData = await userModel.findOne({ username: req.session.username }, { _id: 1 })
+            let productData = await productModel.findOne({ _id: id })
+            let cartFind = await cartModel.findOne({ product_id: id })
+            if (cartFind == null) {
+                let cart = await cartModel.create({ user_id: userData._id, product_id: id, image: productData.image, name: productData.name, price: productData.price })
+                return res.redirect("/welcome");
             }
-            transporter.sendMail(mailOptions, (err, info) => {
-                if (err) { console.log(err) }
-                else {
-                    return res.render("resetpassword", { succMsg: "Reset Link send to your email" });
+            else {
+                // let cart = await cartModel.updateOne({ user_id: userData._id, product_id: id },{$inc:{qty:1}})
+                // console.log(cart);
+                return res.redirect("/welcome");
+            }
+        }
+        else {
+            return res.redirect("/login");
+
+        }
+
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+const cart = async (req, res) => {
+    try {
+        if (req.session.username) {
+            let userData = await userModel.findOne({ username: req.session.username }, { _id: 1 })
+            cartModel.find({ user_id: userData._id }, (err, data) => {
+                let cartData = data.map(data => data.toJSON());
+                let sum = 0;
+                for (let i = 0; i < cartData.length; i++) {
+                    sum += cartData[i].qty * cartData[i].price;
+                    cartData[i].total = cartData[i].qty * cartData[i].price;
                 }
+                res.render("cartpage", { data: cartData, name: req.session.username, sum: sum})
             })
         }
         else {
-            return res.render("resetpassword", { errMsg: "Email is not exists", csrf: req.csrfToken() });
+            return res.redirect("/login");
+
         }
     }
     catch (err) {
         console.log(err);
     }
 }
-
-const resetAccount = (req, res) => {
+const changeQtyByAjax = async (req, res) => {
     try {
-        res.render("resetaccount", { csrf: req.csrfToken(), uid: req.query.id, token: req.query.token });
-    }
-    catch (err) {
-        console.log(err);
-    }
-}
-
-const postresetpassword = async (req, res) => {
-    try {
-        let { id, token, password, _csrf } = req.body;
-        let pass1 = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,24}$/;
-        let passErr;
-        if (pass1.test(password)) {
-
-            let passToken = await tokenModel.findOne({ userId: id })
-            if (!passToken) {
-                return res.render("resetaccount", { errMsg: "Pass : Token Expire" })
+        if (req.session.username) {
+            const { p_id, cart_id, operation } = req.body
+            if (operation == 'plus') {
+                let cart = await cartModel.updateOne({ _id: cart_id, product_id: p_id }, { $inc: { qty: 1 } })
+                let cartFindQty = await cartModel.find({ _id: cart_id, product_id: p_id }, { qty: 1 })
+                ret = {
+                    qty: cartFindQty[0].qty,
+                    'status': 'successs'
+                };
+                res.send(ret);
             }
-
-            const isValid = await bcrypt.compare(token, passToken.token);
-            if (!isValid) {
-                return res.render("resetaccount", { errMsg: "Pass 1 :Token Expire" })
+            if (operation == 'minus') {
+                let cart = await cartModel.updateOne({ _id: cart_id, product_id: p_id }, { $inc: { qty: -1 } })
+                let cartFindQty = await cartModel.find({ _id: cart_id, product_id: p_id }, { qty: 1 })
+                if (cartFindQty[0].qty == 0) {
+                    await cartModel.deleteOne({ _id: cart_id, product_id: p_id })
+                    ret = {
+                        qty: cartFindQty[0].qty,
+                        'status': 'deleted'
+                    };
+                    res.send(ret);
+                }
+                else {
+                    ret = {
+                        qty: cartFindQty[0].qty,
+                        'status': 'successs'
+                    };
+                    res.send(ret);
+                }
             }
-            const hash = await bcrypt.hash(password, Number(saltRounds));
-            await userModel.updateOne({
-                _id: id
-            }, { $set: { password: hash } }, { new: true }
-            );
-            return res.redirect("/")
         }
         else {
-            if (!pass1.test(password)) {
-                passErr = 'password between 8 to 24 characters which contain at least one  uppercase,lowercase'
-            }
-            res.render("resetaccount", { csrf: _csrf, uid: id, token: token, passErr: passErr });
+            return res.redirect("/login");
 
         }
     }
@@ -287,46 +275,48 @@ const postresetpassword = async (req, res) => {
         console.log(err);
     }
 }
+const deletecart = async (req, res) => {
+    let cartID = req.params.id;
+    await cartModel.deleteOne({ _id: cartID })
+    res.redirect('/cart')
+}
 
-const activateAccount = async (req, res) => {
+const checkout = async (req, res) => {
     try {
-        let id = req.params.id;
-        const data = await userModel.findOne({ _id: id })
-        if (!data) {
-            res.send("Some Thing Went Wrong")
+        if (req.session.username) {
+            let userData = await userModel.findOne({ username: req.session.username }, { _id: 1 })
+            cartModel.find({ user_id: userData._id }, (err, data) => {
+                let sum = 0;
+                for (let i = 0; i < data.length; i++) {
+                    sum += data[i].qty * data[i].price;
+                }
+                res.render("checkout", { sum: sum, name: req.session.username })
+            })
         }
-        const d = await userModel.updateOne({ _id: id }, { $set: { status: 1 } })
-        if (!d) {
-            res.send("Some Thing Went Wrong")
+        else {
+            return res.redirect("/login");
         }
-        res.send(`<script>
-        alert('Your Account is Activated'); 
-        window.location.assign('/login')
-        </script>`);
-
     }
-
+    catch (err) {
+        console.log(err);
+    }
+}
+const postcheckout = async (req, res) => {
+    try {
+        if (req.session.username) {
+            let userData = await userModel.findOne({ username: req.session.username }, { _id: 1 })
+            await cartModel.deleteMany({ user_id: userData._id })
+            res.render('orderplace', { name: req.session.username, successMsg: "Order place successfully" })
+        }
+        else {
+            return res.redirect("/login");
+        }
+    }
     catch (err) {
         console.log(err);
     }
 }
 
-const folderPath='public/uploads'
-const downloadFile = async (req, res) => {
-    let username = req.session.username;
-    if (username) {
-        userModel.findOne({ username: username }, (err, data) => {
-            if (err) {
-                res.send(err)
-            }
-            else {
-                res.download(folderPath + `/${data.image}`, (err) = {
-                    if(err) { }
-                })
-            }
-        })
-    }
-}
 module.exports =
 {
     homePage,
@@ -335,9 +325,10 @@ module.exports =
     loginPage,
     postLogin,
     welcomePage,
-    postReset,
-    resetAccount,
-    postresetpassword,
-    activateAccount,
-    downloadFile
+    addtocart,
+    cart,
+    changeQtyByAjax,
+    deletecart,
+    checkout,
+    postcheckout
 };

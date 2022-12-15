@@ -4,7 +4,7 @@
         margin: 0;
         padding: 0;
         height: 100%;
-        background: #60a3bc !important;
+        background: #dbe6eb !important;
     }
     .user_card {
         height: 370px;
@@ -25,7 +25,7 @@
     }
     .user_card1 {
         height:auto;
-        width: 350px;
+        width: 400px;
         margin-top: 60px;
         margin-bottom: auto;
         background: #f39c12;
@@ -45,7 +45,7 @@
         width: 350px;
         margin-top: auto;
         margin-bottom: auto;
-        background: #f39c12;
+        background: #f5c270;
         position: relative;
         display: flex;
         justify-content: center;
@@ -64,7 +64,7 @@
         width: 170px;
         top: -75px;
         border-radius: 50%;
-        background: #60a3bc;
+        background: #f9fbfb;
         padding: 10px;
         text-align: center;
     }

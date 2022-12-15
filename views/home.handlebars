@@ -1,5 +1,17 @@
-<%- include('./partials/nav.ejs') %>
-<h1 class="text-dark text-center">This is an Home Page</h1>
+{{>nav}}
 
-<%- include('./partials/footer.ejs') %>
-
+<div class="container mt-4 rounded bg-light">
+    <div class="row">
+        <div class="col-md-12 mt-4">
+            <h1 class="heading">Pizza Delivary</h1>
+            <p class="pra">Welcome to Pizza delivery service.This is the place when you may chose the most delicious
+                pizza you like from wide variety of options!</p>
+            <hr />
+            <p class="pra">we're performing delivery free of charge in case if your order is higher than &#8377;200</p>
+        </div>
+    </div>
+    <div class="row p-3">
+        <a class="btn btn-dark mb-5" href="/login">Sign In To Order</a>
+    </div>
+</div>
+{{>footer}}

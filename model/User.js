@@ -14,7 +14,11 @@ const userSchema=new mongoose.Schema({
         type:String,
         required:true
     },
-    image:{
+    mobile:{
+        type:String,
+        required:true
+    },
+    address:{
         type:String,
         required:true
     },
